@@ -56,6 +56,6 @@ func (s *Suite) TestCoverage(ctx context.Context, t *testing.T) {
 
 	profile = testpgz.GetProfile(ctx, "pg_increment")
 	profile.RequireFullCoverage(t)
-
+	profile.RequireCoverage(t, 1.0, 1.0)
 	profile.PrettyPrint()
 }

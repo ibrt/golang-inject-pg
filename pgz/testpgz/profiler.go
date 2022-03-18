@@ -52,7 +52,8 @@ func (p *Profile) PrettyPrint() {
 	w.RowSeparator = "─"
 
 	fmt.Println()
-	fmt.Printf("Coverage Report - %v\n", p.FunctionName)
+	fmt.Println("COVERAGE REPORT")
+	fmt.Println(p.FunctionName)
 	fmt.Println()
 
 	fmt.Println("Coverage Totals")
