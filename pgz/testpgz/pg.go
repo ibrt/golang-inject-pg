@@ -2,9 +2,12 @@ package testpgz
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/ibrt/golang-errors/errorz"
 	"github.com/ibrt/golang-fixtures/fixturez"
 
 	"github.com/ibrt/golang-inject-pg/pgz"
@@ -13,6 +16,7 @@ import (
 var (
 	_ fixturez.BeforeSuite = &Helper{}
 	_ fixturez.AfterSuite  = &Helper{}
+	_ fixturez.BeforeTest  = &Helper{}
 )
 
 // Helper provides a test helper for logz using a real logger.
@@ -23,24 +27,53 @@ type Helper struct {
 }
 
 // BeforeSuite implements fixturez.BeforeSuite.
-func (f *Helper) BeforeSuite(ctx context.Context, _ *testing.T) context.Context {
+func (h *Helper) BeforeSuite(ctx context.Context, _ *testing.T) context.Context {
 	cfg := pgz.GetConfig(ctx)
-	f.dbName = "test_" + uuid.Must(uuid.NewV4()).String()
-	MustCreateDB(cfg.PostgresURL, f.dbName)
-	f.origPostgresURL = cfg.PostgresURL
-	cfg.PostgresURL = MustSelectDB(cfg.PostgresURL, f.dbName)
+	h.dbName = "test_" + uuid.Must(uuid.NewV4()).String()
+	MustCreateDB(cfg.PostgresURL, h.dbName)
+	h.origPostgresURL = cfg.PostgresURL
+	cfg.PostgresURL = MustSelectDB(cfg.PostgresURL, h.dbName)
 
 	injector, releaser := pgz.Initializer(ctx)
-	f.releaser = releaser
+	h.releaser = releaser
 	return injector(ctx)
 }
 
 // AfterSuite implements fixturez.AfterSuite.
-func (f *Helper) AfterSuite(ctx context.Context, _ *testing.T) {
-	f.releaser()
-	f.releaser = nil
+func (h *Helper) AfterSuite(ctx context.Context, _ *testing.T) {
+	h.releaser()
+	h.releaser = nil
 
 	cfg := pgz.GetConfig(ctx)
-	cfg.PostgresURL = f.origPostgresURL
-	MustDropDB(cfg.PostgresURL, f.dbName)
+	cfg.PostgresURL = h.origPostgresURL
+	MustDropDB(cfg.PostgresURL, h.dbName)
+}
+
+// BeforeTest implements fixtures.BeforeTest.
+func (h *Helper) BeforeTest(ctx context.Context, _ *testing.T) context.Context {
+	h.resetNow(ctx)
+	return ctx
+}
+
+// SetNow sets the "pg_now" function to return the given time.
+// Note that this function rounds the time to microseconds for precision parity with Postgres, returns the rounded time.
+func (h *Helper) SetNow(ctx context.Context, t time.Time) time.Time {
+	t = t.Truncate(time.Microsecond)
+
+	_, err := pgz.GetCtx(ctx).Exec(`
+		CREATE OR REPLACE FUNCTION pg_now() RETURNS timestamptz AS
+		$$ SELECT to_timestamp(` + fmt.Sprintf("%.6f", float64(t.UnixMicro())/1e6) + `); $$
+		LANGUAGE SQL STABLE;
+	`)
+	errorz.MaybeMustWrap(err)
+	return t
+}
+
+func (h *Helper) resetNow(ctx context.Context) {
+	_, err := pgz.GetCtx(ctx).Exec(`
+		CREATE OR REPLACE FUNCTION pg_now() RETURNS timestamptz AS
+		$$ SELECT now(); $$
+		LANGUAGE SQL STABLE;
+	`)
+	errorz.MaybeMustWrap(err)
 }

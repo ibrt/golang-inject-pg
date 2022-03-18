@@ -3,8 +3,10 @@ package testpgz_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/ibrt/golang-fixtures/fixturez"
+	"github.com/stretchr/testify/require"
 
 	"github.com/ibrt/golang-inject-pg/pgz"
 	"github.com/ibrt/golang-inject-pg/pgz/internal"
@@ -22,6 +24,11 @@ type Suite struct {
 }
 
 func (s *Suite) TestHelper(ctx context.Context, t *testing.T) {
-	_, err := pgz.GetCtx(ctx).Exec(`SELECT 1`)
-	fixturez.RequireNoError(t, err)
+	now := s.PG.SetNow(ctx, time.Now().Add(-time.Hour))
+	row := pgz.GetCtx(ctx).QueryRow(`SELECT pg_now()`)
+	fixturez.RequireNoError(t, row.Err())
+	var gNow time.Time
+	fixturez.RequireNoError(t, row.Scan(&gNow))
+	fixturez.RequireNoError(t, row.Err())
+	require.Equal(t, gNow.UnixNano(), now.UnixNano())
 }
