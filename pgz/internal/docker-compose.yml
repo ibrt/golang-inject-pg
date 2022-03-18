@@ -1,0 +1,13 @@
+version: '3'
+services:
+  pg:
+    build:
+      context: ''
+      args:
+        POSTGRES_VERSION: '${POSTGRES_VERSION}'
+    image: 'pg'
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    environment:
+      POSTGRES_PASSWORD: 'password'
+    restart: 'unless-stopped'

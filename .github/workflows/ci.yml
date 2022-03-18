@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.8
+      - name: test
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          POSTGRES_VERSION='14.2'  POSTGRES_PORT='5433' ./test.sh
+          POSTGRES_VERSION='13.6'  POSTGRES_PORT='5434' ./test.sh
+          POSTGRES_VERSION='12.10' POSTGRES_PORT='5435' ./test.sh
+          POSTGRES_VERSION='11.15' POSTGRES_PORT='5436' ./test.sh
+          POSTGRES_VERSION='10.20' POSTGRES_PORT='5437' ./test.sh
+          bash <(curl -s https://codecov.io/bash)
