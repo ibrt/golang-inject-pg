@@ -97,12 +97,12 @@ func GetProfile(ctx context.Context, functionName string) *Profile {
 	}
 
 	row := pgz.GetCtx(ctx).QueryRow(`SELECT plpgsql_coverage_statements($1)`, functionName)
-	errorz.MaybeMustWrap(row.Err())
-	errorz.MaybeMustWrap(row.Scan(&profile.StatementsTotal))
+	errorz.MaybeMustWrap(row.Err(), errorz.Skip())
+	errorz.MaybeMustWrap(row.Scan(&profile.StatementsTotal), errorz.Skip())
 
 	row = pgz.GetCtx(ctx).QueryRow(`SELECT plpgsql_coverage_branches($1)`, functionName)
-	errorz.MaybeMustWrap(row.Err())
-	errorz.MaybeMustWrap(row.Scan(&profile.BranchesTotal))
+	errorz.MaybeMustWrap(row.Err(), errorz.Skip())
+	errorz.MaybeMustWrap(row.Scan(&profile.BranchesTotal), errorz.Skip())
 
 	errorz.MaybeMustWrap(sqlscan.Select(ctx, pgz.Get(ctx), &profile.ByLine, `
 		SELECT 
@@ -110,7 +110,8 @@ func GetProfile(ctx context.Context, functionName string) *Profile {
 			COALESCE(exec_stmts, 0) AS exec_stmts, 
 			COALESCE(source, '') AS source 
 		FROM plpgsql_profiler_function_tb($1)`,
-		functionName))
+		functionName),
+		errorz.Skip())
 
 	errorz.MaybeMustWrap(sqlscan.Select(ctx, pgz.Get(ctx), &profile.ByStatement, `
 		SELECT 
@@ -121,7 +122,8 @@ func GetProfile(ctx context.Context, functionName string) *Profile {
 			COALESCE(exec_stmts, 0) AS exec_stmts, 
 			COALESCE(stmtname, '') AS stmtname 
 		FROM plpgsql_profiler_function_statements_tb($1)`,
-		functionName))
+		functionName),
+		errorz.Skip())
 
 	return profile
 }
@@ -134,7 +136,8 @@ func ResetProfiler(ctx context.Context, functionNames ...string) {
 				SELECT oid FROM pg_proc WHERE proname = $1
 			))`,
 			functionName)
-		errorz.MaybeMustWrap(err)
-		errorz.Assertf(GetProfile(ctx, functionName).StatementsTotal == 0, "coverage unexpectedly present")
+		errorz.MaybeMustWrap(err, errorz.Skip())
+		errorz.Assertf(GetProfile(ctx, functionName).StatementsTotal == 0,
+			"coverage unexpectedly present", errorz.Skip())
 	}
 }

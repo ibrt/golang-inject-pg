@@ -23,21 +23,26 @@ var (
 	validate = validator.New()
 )
 
-// PGConfig describes the configuration for the Postgres module.
-type PGConfig struct {
+// Config describes the configuration PG.
+type Config struct {
 	PostgresURL      string `json:"postgresUrl" validate:"required,url"`
 	EnableProxyMode  bool   `json:"proxyMode"`
 	ConnectTimeoutMS uint32 `json:"connectTimeoutMs"`
 }
 
-// NewConfigSingletonInjector always inject the given PGConfig.
-func NewConfigSingletonInjector(cfg *PGConfig) injectz.Injector {
+// NewConfigSingletonInjector always inject the given *Config.
+func NewConfigSingletonInjector(cfg *Config) injectz.Injector {
 	return func(ctx context.Context) context.Context {
 		return context.WithValue(ctx, pgConfigContextKey, cfg)
 	}
 }
 
-// PG describes the Postgres module (a subset of *sql.DB).
+// GetConfig extracts the *Config from context, panics if not found.
+func GetConfig(ctx context.Context) *Config {
+	return ctx.Value(pgConfigContextKey).(*Config)
+}
+
+// PG describes the pg module (a subset of *sql.DB).
 type PG interface {
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
@@ -56,28 +61,28 @@ type contextPGImpl struct {
 	pg  PG
 }
 
-// Exec delegates to PG.ExecContext.
+// Exec executes a query.
 func (p *contextPGImpl) Exec(query string, args ...interface{}) (sql.Result, error) {
 	return p.pg.ExecContext(p.ctx, query, args...)
 }
 
-// Query delegates to PG.QueryContext.
+// Query executes a query.
 func (p *contextPGImpl) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	return p.pg.QueryContext(p.ctx, query, args...)
 }
 
-// QueryRow delegates to PG.QueryRowContext.
+// QueryRow executes a query.
 func (p *contextPGImpl) QueryRow(query string, args ...interface{}) *sql.Row {
 	return p.pg.QueryRowContext(p.ctx, query, args...)
 }
 
-// Initializer is an initializer for the Postgres module.
+// Initializer is a PG initializer.
 func Initializer(ctx context.Context) (injectz.Injector, injectz.Releaser) {
-	cfg := ctx.Value(pgConfigContextKey).(*PGConfig)
+	cfg := ctx.Value(pgConfigContextKey).(*Config)
 	errorz.MaybeMustWrap(validate.Struct(cfg))
 
 	pgxCfg, err := pgx.ParseConfig(cfg.PostgresURL)
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 
 	if cfg.EnableProxyMode {
 		pgxCfg.BuildStatementCache = nil
@@ -98,7 +103,7 @@ func Initializer(ctx context.Context) (injectz.Injector, injectz.Releaser) {
 
 	if err := db.PingContext(pingCTX); err != nil {
 		errorz.IgnoreClose(db)
-		errorz.MustWrap(err)
+		errorz.MustWrap(err, errorz.Skip())
 	}
 
 	injector := func(ctx context.Context) context.Context {
@@ -123,9 +128,4 @@ func GetCtx(ctx context.Context) ContextPG {
 		ctx: ctx,
 		pg:  Get(ctx),
 	}
-}
-
-// GetConfig extracts the *PGConfig from context, panics if not found.
-func GetConfig(ctx context.Context) *PGConfig {
-	return ctx.Value(pgConfigContextKey).(*PGConfig)
 }

@@ -20,7 +20,7 @@ func TestHelpers(t *testing.T) {
 
 type Suite struct {
 	*fixturez.DefaultConfigMixin
-	PGConfig *internal.PGConfigHelper
+	PGConfig *internal.ConfigHelper
 	PG       *testpgz.Helper
 }
 

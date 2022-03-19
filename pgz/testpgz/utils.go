@@ -16,12 +16,12 @@ import (
 // MustOpen opens a Postgres DB and checks the connection, panics on error.
 func MustOpen(pgURL string) *sql.DB {
 	cfg, err := pgx.ParseConfig(pgURL)
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 	cfg.ConnectTimeout = 5 * time.Second
 	db := stdlib.OpenDB(*cfg)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	errorz.MaybeMustWrap(db.PingContext(ctx))
+	errorz.MaybeMustWrap(db.PingContext(ctx), errorz.Skip())
 	return db
 }
 
@@ -32,10 +32,10 @@ func MustCreateDB(pgURL, dbName string) {
 	escapedDBName := strings.ReplaceAll(dbName, `"`, `""`)
 
 	_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%v"`, escapedDBName))
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 
 	_, err = db.Exec(fmt.Sprintf(`CREATE DATABASE "%v"`, escapedDBName))
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 }
 
 // MustDropDB drops a Postgres database, panics on error.
@@ -44,13 +44,13 @@ func MustDropDB(pgURL, dbName string) {
 	defer errorz.IgnoreClose(db)
 
 	_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%v"`, strings.ReplaceAll(dbName, `"`, `""`)))
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 }
 
 // MustSelectDB returns a new pgURL with the given DB name, panics on error.
 func MustSelectDB(pgURL, dbName string) string {
 	parsedDBURL, err := url.Parse(pgURL)
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 	parsedDBURL.Path = dbName
 	return parsedDBURL.String()
 }

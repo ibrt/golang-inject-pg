@@ -23,7 +23,7 @@ type Tx struct {
 	allowReentrant bool
 }
 
-// NewTx configures a new Tx.
+// NewTx initializes a new Tx.
 func NewTx(ctx context.Context) *Tx {
 	return &Tx{
 		ctx:            ctx,
@@ -72,7 +72,7 @@ func (t *Tx) Run(f func(ctx context.Context) error) error {
 			continue
 		}
 
-		return errorz.Wrap(err)
+		return errorz.Wrap(err, errorz.Skip())
 	}
 
 	panic("unreachable")

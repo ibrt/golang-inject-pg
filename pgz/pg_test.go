@@ -19,7 +19,7 @@ func TestDatabase(t *testing.T) {
 
 type Suite struct {
 	*fixturez.DefaultConfigMixin
-	PGConfig *internal.PGConfigHelper
+	PGConfig *internal.ConfigHelper
 	PG       *testpgz.Helper
 }
 
@@ -47,7 +47,7 @@ func (s *Suite) TestPG(ctx context.Context, t *testing.T) {
 }
 
 func TestFail(t *testing.T) {
-	ctx := pgz.NewConfigSingletonInjector(&pgz.PGConfig{
+	ctx := pgz.NewConfigSingletonInjector(&pgz.Config{
 		PostgresURL:      "postgres://postgres:password@localhost:3672/postgres",
 		EnableProxyMode:  true,
 		ConnectTimeoutMS: 500,

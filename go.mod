@@ -7,13 +7,13 @@ require (
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/ibrt/golang-errors v1.0.0
-	github.com/ibrt/golang-fixtures v1.1.0
+	github.com/ibrt/golang-fixtures v1.2.1
 	github.com/ibrt/golang-inject v1.0.1
 	github.com/jackc/pgconn v1.11.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/lensesio/tableprinter v0.0.0-20201125135848-89e81fc956e7
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	go4.org v0.0.0-20201209231011-d4a079459e60
 )
 
@@ -34,8 +34,9 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
+	github.com/sanity-io/litter v1.5.4 // indirect
+	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
+	golang.org/x/sys v0.0.0-20220318055525-2edf467146b5 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

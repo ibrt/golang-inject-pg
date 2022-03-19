@@ -19,7 +19,7 @@ var (
 	_ fixturez.BeforeTest  = &Helper{}
 )
 
-// Helper provides a test helper for logz using a real logger.
+// Helper is a test helper for PG.
 type Helper struct {
 	origPostgresURL string
 	dbName          string
@@ -65,7 +65,7 @@ func (h *Helper) SetNow(ctx context.Context, t time.Time) time.Time {
 		$$ SELECT to_timestamp(` + fmt.Sprintf("%.6f", float64(t.UnixMicro())/1e6) + `); $$
 		LANGUAGE SQL STABLE;
 	`)
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 	return t
 }
 
@@ -75,5 +75,5 @@ func (h *Helper) resetNow(ctx context.Context) {
 		$$ SELECT now(); $$
 		LANGUAGE SQL STABLE;
 	`)
-	errorz.MaybeMustWrap(err)
+	errorz.MaybeMustWrap(err, errorz.Skip())
 }
