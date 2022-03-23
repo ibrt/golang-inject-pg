@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/ibrt/golang-errors/errorz"
 	"github.com/ibrt/golang-inject/injectz"
+	"github.com/ibrt/golang-validation/vz"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/stdlib"
 )
@@ -19,15 +19,16 @@ const (
 	pgConfigContextKey
 )
 
-var (
-	validate = validator.New()
-)
-
-// Config describes the configuration PG.
+// Config describes the configuration for PG.
 type Config struct {
-	PostgresURL      string `json:"postgresUrl" validate:"required,url"`
-	EnableProxyMode  bool   `json:"proxyMode"`
-	ConnectTimeoutMS uint32 `json:"connectTimeoutMs"`
+	PostgresURL           string `json:"postgresUrl" validate:"required,url"`
+	EnableProxyMode       bool   `json:"proxyMode"`
+	ConnectTimeoutSeconds uint32 `json:"connectTimeoutSeconds"`
+}
+
+// Validate implements the vz.Validator interface.
+func (c *Config) Validate() error {
+	return errorz.MaybeWrap(vz.ValidateStruct(c), errorz.SkipPackage())
 }
 
 // NewConfigSingletonInjector always inject the given *Config.
@@ -79,10 +80,10 @@ func (p *contextPGImpl) QueryRow(query string, args ...interface{}) *sql.Row {
 // Initializer is a PG initializer.
 func Initializer(ctx context.Context) (injectz.Injector, injectz.Releaser) {
 	cfg := ctx.Value(pgConfigContextKey).(*Config)
-	errorz.MaybeMustWrap(validate.Struct(cfg))
+	errorz.MaybeMustWrap(cfg.Validate(), errorz.SkipPackage())
 
 	pgxCfg, err := pgx.ParseConfig(cfg.PostgresURL)
-	errorz.MaybeMustWrap(err, errorz.Skip())
+	errorz.MaybeMustWrap(err, errorz.SkipPackage())
 
 	if cfg.EnableProxyMode {
 		pgxCfg.BuildStatementCache = nil
@@ -91,7 +92,7 @@ func Initializer(ctx context.Context) (injectz.Injector, injectz.Releaser) {
 
 	pingCTX := ctx
 
-	if timeout := time.Duration(cfg.ConnectTimeoutMS) * time.Millisecond; timeout > 0 {
+	if timeout := time.Duration(cfg.ConnectTimeoutSeconds) * time.Second; timeout > 0 {
 		pgxCfg.ConnectTimeout = timeout
 
 		var cancel context.CancelFunc
@@ -103,7 +104,7 @@ func Initializer(ctx context.Context) (injectz.Injector, injectz.Releaser) {
 
 	if err := db.PingContext(pingCTX); err != nil {
 		errorz.IgnoreClose(db)
-		errorz.MustWrap(err, errorz.Skip())
+		errorz.MustWrap(err, errorz.SkipPackage())
 	}
 
 	injector := func(ctx context.Context) context.Context {

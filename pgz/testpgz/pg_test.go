@@ -26,12 +26,8 @@ type Suite struct {
 
 func (s *Suite) TestNow(ctx context.Context, t *testing.T) {
 	now := s.PG.SetNow(ctx, time.Now().Add(-time.Hour))
-	row := pgz.GetCtx(ctx).QueryRow(`SELECT pg_now()`)
-	fixturez.RequireNoError(t, row.Err())
-	var gNow time.Time
-	fixturez.RequireNoError(t, row.Scan(&gNow))
-	fixturez.RequireNoError(t, row.Err())
-	require.Equal(t, gNow.UnixNano(), now.UnixNano())
+	getNow := s.PG.GetNow(ctx)
+	require.Equal(t, now, getNow)
 }
 
 func (s *Suite) TestCoverage(ctx context.Context, t *testing.T) {

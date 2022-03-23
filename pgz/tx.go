@@ -55,9 +55,9 @@ func (t *Tx) SetAllowReentrant(allowReentrant bool) *Tx {
 func (t *Tx) Run(f func(ctx context.Context) error) error {
 	if _, ok := t.ctx.Value(dbContextKey).(*sql.Tx); ok {
 		if !t.allowReentrant {
-			return errorz.Errorf("unexpectedly nested transaction", errorz.Skip())
+			return errorz.Errorf("unexpectedly nested transaction", errorz.SkipPackage())
 		}
-		return errorz.MaybeWrap(f(t.ctx), errorz.Skip())
+		return errorz.MaybeWrap(f(t.ctx), errorz.SkipPackage())
 	}
 
 	for i := 0; i < txMaxRetries; i++ {
@@ -72,7 +72,7 @@ func (t *Tx) Run(f func(ctx context.Context) error) error {
 			continue
 		}
 
-		return errorz.Wrap(err, errorz.Skip())
+		return errorz.Wrap(err, errorz.SkipPackage())
 	}
 
 	panic("unreachable")
@@ -84,15 +84,15 @@ func (t *Tx) runTxOnce(f func(ctx context.Context) error) error {
 		ReadOnly:  t.readOnly,
 	})
 	if err != nil {
-		return errorz.Wrap(err, errorz.Skip())
+		return errorz.Wrap(err, errorz.SkipPackage())
 	}
 	defer func() {
 		_ = tx.Rollback()
 	}()
 
 	if err := f(context.WithValue(t.ctx, dbContextKey, tx)); err != nil {
-		return errorz.Wrap(err, errorz.Skip())
+		return errorz.Wrap(err, errorz.SkipPackage())
 	}
 
-	return errorz.MaybeWrap(tx.Commit(), errorz.Skip())
+	return errorz.MaybeWrap(tx.Commit(), errorz.SkipPackage())
 }

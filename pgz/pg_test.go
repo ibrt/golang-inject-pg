@@ -48,9 +48,9 @@ func (s *Suite) TestPG(ctx context.Context, t *testing.T) {
 
 func TestFail(t *testing.T) {
 	ctx := pgz.NewConfigSingletonInjector(&pgz.Config{
-		PostgresURL:      "postgres://postgres:password@localhost:3672/postgres",
-		EnableProxyMode:  true,
-		ConnectTimeoutMS: 500,
+		PostgresURL:           "postgres://postgres:password@localhost:3672/postgres",
+		EnableProxyMode:       true,
+		ConnectTimeoutSeconds: 5,
 	})(context.Background())
 
 	require.Panics(t, func() {

@@ -2,7 +2,6 @@ package testpgz
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -27,7 +26,9 @@ type Helper struct {
 }
 
 // BeforeSuite implements fixturez.BeforeSuite.
-func (h *Helper) BeforeSuite(ctx context.Context, _ *testing.T) context.Context {
+func (h *Helper) BeforeSuite(ctx context.Context, t *testing.T) context.Context {
+	t.Helper()
+
 	cfg := pgz.GetConfig(ctx)
 	h.dbName = "test_" + uuid.Must(uuid.NewV4()).String()
 	MustCreateDB(cfg.PostgresURL, h.dbName)
@@ -40,7 +41,9 @@ func (h *Helper) BeforeSuite(ctx context.Context, _ *testing.T) context.Context 
 }
 
 // AfterSuite implements fixturez.AfterSuite.
-func (h *Helper) AfterSuite(ctx context.Context, _ *testing.T) {
+func (h *Helper) AfterSuite(ctx context.Context, t *testing.T) {
+	t.Helper()
+
 	h.releaser()
 	h.releaser = nil
 
@@ -50,7 +53,9 @@ func (h *Helper) AfterSuite(ctx context.Context, _ *testing.T) {
 }
 
 // BeforeTest implements fixtures.BeforeTest.
-func (h *Helper) BeforeTest(ctx context.Context, _ *testing.T) context.Context {
+func (h *Helper) BeforeTest(ctx context.Context, t *testing.T) context.Context {
+	t.Helper()
+
 	h.resetNow(ctx)
 	return ctx
 }
@@ -58,15 +63,28 @@ func (h *Helper) BeforeTest(ctx context.Context, _ *testing.T) context.Context {
 // SetNow sets the "pg_now" function to return the given time.
 // Note that this function rounds the time to microseconds for precision parity with Postgres, returns the rounded time.
 func (h *Helper) SetNow(ctx context.Context, t time.Time) time.Time {
-	t = t.Truncate(time.Microsecond)
+	const layout = "2006-01-02 15:04:05.999999-07"
+	t = t.Truncate(time.Microsecond).UTC()
 
 	_, err := pgz.GetCtx(ctx).Exec(`
 		CREATE OR REPLACE FUNCTION pg_now() RETURNS timestamptz AS
-		$$ SELECT to_timestamp(` + fmt.Sprintf("%.6f", float64(t.UnixMicro())/1e6) + `); $$
+		$$ SELECT '` + t.Format(layout) + `'::timestamptz; $$
 		LANGUAGE SQL STABLE;
 	`)
-	errorz.MaybeMustWrap(err, errorz.Skip())
+	errorz.MaybeMustWrap(err, errorz.SkipPackage())
 	return t
+}
+
+// GetNow calls the "pg_now" function.
+func (h *Helper) GetNow(ctx context.Context) time.Time {
+	row := pgz.GetCtx(ctx).QueryRow(`SELECT pg_now()`)
+	errorz.MaybeMustWrap(row.Err(), errorz.SkipPackage())
+
+	var now time.Time
+	errorz.MaybeMustWrap(row.Scan(&now), errorz.SkipPackage())
+	errorz.MaybeMustWrap(row.Err(), errorz.SkipPackage())
+
+	return now.UTC()
 }
 
 func (h *Helper) resetNow(ctx context.Context) {
@@ -75,5 +93,5 @@ func (h *Helper) resetNow(ctx context.Context) {
 		$$ SELECT now(); $$
 		LANGUAGE SQL STABLE;
 	`)
-	errorz.MaybeMustWrap(err, errorz.Skip())
+	errorz.MaybeMustWrap(err, errorz.SkipPackage())
 }

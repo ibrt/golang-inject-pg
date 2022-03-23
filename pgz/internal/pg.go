@@ -21,12 +21,14 @@ type ConfigHelper struct {
 }
 
 // BeforeSuite implements fixturez.BeforeSuite.
-func (h *ConfigHelper) BeforeSuite(ctx context.Context, _ *testing.T) context.Context {
+func (h *ConfigHelper) BeforeSuite(ctx context.Context, t *testing.T) context.Context {
+	t.Helper()
+
 	return pgz.NewConfigSingletonInjector(&pgz.Config{
 		PostgresURL: fmt.Sprintf(
 			"postgres://postgres:password@localhost:%v/postgres",
 			os.Getenv("POSTGRES_PORT")),
-		EnableProxyMode:  true,
-		ConnectTimeoutMS: 500,
+		EnableProxyMode:       true,
+		ConnectTimeoutSeconds: 5,
 	})(ctx)
 }

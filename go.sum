@@ -98,6 +98,8 @@ github.com/ibrt/golang-fixtures v1.2.4 h1:4apnTvZDttZve/A+ydUK7pjFomYMG6fq88F6HM
 github.com/ibrt/golang-fixtures v1.2.4/go.mod h1:1NQ7H9oSxi3ovTSFBEAzrrXIeox5jtn2HFXht64AHjQ=
 github.com/ibrt/golang-inject v1.1.0 h1:C2ChbQeLtnf4+6rKfeD7UmaZC5QusPh0aAi89/Qs8sI=
 github.com/ibrt/golang-inject v1.1.0/go.mod h1:Orii0eKaskijFl2Yl8YVVAPUxZ4r7sAKMLXcREYnedo=
+github.com/ibrt/golang-validation v1.0.2 h1:SYOEANZjQMIqAs4NMX40wCoHF7UEM65ZcFbSV7MinGE=
+github.com/ibrt/golang-validation v1.0.2/go.mod h1:WdPIPHIm9PHNucOHnw2a+BbdPApbZOiCoXLT8ZBGjWk=
 github.com/jackc/chunkreader v1.0.0 h1:4s39bBR8ByfqH+DKm8rQA3E1LHZWB9XWcrz8fqaZbe0=
 github.com/jackc/chunkreader v1.0.0/go.mod h1:RT6O25fNZIuasFJRyZ4R/Y2BbhasbmZXF9QQ7T3kePo=
 github.com/jackc/chunkreader/v2 v2.0.0/go.mod h1:odVSm741yZoC3dpHEUXIqA9tQRhFrgOHwnPIn9lDKlk=

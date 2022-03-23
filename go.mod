@@ -4,11 +4,11 @@ go 1.17
 
 require (
 	github.com/georgysavva/scany v0.3.0
-	github.com/go-playground/validator/v10 v10.10.1
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/ibrt/golang-errors v1.1.3
 	github.com/ibrt/golang-fixtures v1.2.4
 	github.com/ibrt/golang-inject v1.1.0
+	github.com/ibrt/golang-validation v1.0.2
 	github.com/jackc/pgconn v1.11.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451
 	github.com/jackc/pgx/v4 v4.15.0
@@ -22,6 +22,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
+	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
