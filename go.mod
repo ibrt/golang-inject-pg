@@ -6,9 +6,9 @@ require (
 	github.com/georgysavva/scany v0.3.0
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/gofrs/uuid v4.2.0+incompatible
-	github.com/ibrt/golang-errors v1.0.0
-	github.com/ibrt/golang-fixtures v1.2.1
-	github.com/ibrt/golang-inject v1.0.1
+	github.com/ibrt/golang-errors v1.1.3
+	github.com/ibrt/golang-fixtures v1.2.4
+	github.com/ibrt/golang-inject v1.1.0
 	github.com/jackc/pgconn v1.11.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451
 	github.com/jackc/pgx/v4 v4.15.0
@@ -35,8 +35,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sanity-io/litter v1.5.4 // indirect
-	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
-	golang.org/x/sys v0.0.0-20220318055525-2edf467146b5 // indirect
+	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
+	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
