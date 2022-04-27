@@ -45,6 +45,7 @@ func GetConfig(ctx context.Context) *Config {
 
 // PG describes the pg module (a subset of *sql.DB).
 type PG interface {
+	ContextPG
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
